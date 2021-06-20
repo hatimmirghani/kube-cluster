@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-wildcard-host
+spec:
+  rules:
+  - host: "foo.bar.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/python"
+        backend:
+          service:
+            name: python-app
+            port:
+              number: 80
+      - pathType: Prefix
+        path: "/getting"
+        backend:
+          service:
+            name: getting-started-app
+            port:
+              number: 80
