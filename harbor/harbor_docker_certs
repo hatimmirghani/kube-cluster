@@ -1,0 +1,57 @@
+#Create CA Key
+openssl genrsa -out ca.key 4096
+
+#Create CA Cert
+openssl req -x509 -new -nodes -sha512 -days 3650 -subj "/C=SD/ST=Khartoum/L=Khartoum/CN=mtn.sd" -key ca.key -out ca.crt
+
+#Create Server Certificate
+1. Generate key
+openssl genrsa -out server.key 4096
+
+2. Generate CSR
+openssl req -sha512 -new -subj "/C=SD/ST=Khartoum/L=Khartoum/CN=k8s-harbor.mtn.sd" -key server.key -out server.csr
+
+3. Generate an x509 v3 extension file.
+cat > v3.ext <<-EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1=mtn.sd
+DNS.2=mtn
+DNS.3=k8s-harbor
+
+[ v3_req ]
+subjectAltName = IP:10.10.2.103, k8s-harbor
+EOF
+
+4. Create Certificate
+openssl x509 -req -sha512 -days 3650 -extfile v3.ext -CA ca.crt -CAkey ca.key -CAcreateserial -in server.csr -out server.crt
+
+#Provide Certificate to Harbor
+cp server.crt /data/cert/
+cp server.key /data/cert/
+
+#Convert the Certificate to PEM for docker
+openssl x509 -inform PEM -in server.crt -out server.pem
+
+#Create Directories and copy certificate and CA certificate
+cp server.cert /etc/docker/certs.d/mtn.sd/
+cp server.key /etc/docker/certs.d/mtn.sd/
+cp ca.crt /etc/docker/certs.d/mtn.sd/
+
+#Prepare Harbor
+./prepare
+
+#Restart docker
+systemctl restart docker
+
+#Stop Harbor 
+docker-compose down -v
+
+#Restart Harbor
+docker-compose up -d
+
