@@ -43,7 +43,13 @@ cp server.cert /etc/docker/certs.d/mtn.sd/
 cp server.key /etc/docker/certs.d/mtn.sd/
 cp ca.crt /etc/docker/certs.d/mtn.sd/
 
-#Prepare Harbor
+#Update Host Trust Store
+1. Place the generated ca.crt and server.crt in /etc/pki/ca-trust/source/anchors/
+2. execute:
+update-ca-trust
+
+
+#Goto Harbor directory to Prepare
 ./prepare
 
 #Restart docker
@@ -54,4 +60,3 @@ docker-compose down -v
 
 #Restart Harbor
 docker-compose up -d
-
