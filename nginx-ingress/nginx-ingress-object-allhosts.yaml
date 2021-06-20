@@ -8,17 +8,38 @@ spec:
   rules:
   - http:
       paths:
-      - path: /python
+      - backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+        path: /grafana
         pathType: Prefix
-        backend:
+      - backend:
           service:
             name: python-app
             port:
               number: 80
-      - path: /getting
+        path: /python
         pathType: Prefix
-        backend:
+      - backend:
           service:
             name: getting-started-app
             port:
               number: 80
+        path: /getting
+        pathType: Prefix
+      - backend:
+          service:
+            name: echoserver
+            port:
+              number: 8080
+        path: /echoserver
+        pathType: Prefix
+      - backend:
+          service:
+            name: prometheus
+            port:
+              number: 9090
+        path: /prometheus
+        pathType: Prefix
