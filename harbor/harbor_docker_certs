@@ -1,4 +1,4 @@
-#Create CA Key
+#Create CA Key 
 openssl genrsa -out ca.key 4096
 
 #Create CA Cert
